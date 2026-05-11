@@ -1,0 +1,21 @@
+Policy Number: PN12345
+Policyholder Name: John Doe
+Effective Dates: 2024-01-01 to 2025-01-01
+
+Incident Date: 2024-03-15
+Time: 14:30
+Location: Bangalore
+
+Description: Minor car accident with rear damage.
+
+Claimant: John Doe
+Third Parties: None
+Contact: 9876543210
+
+Asset Type: Car
+Asset ID: KA01AB1234
+Estimated Damage: 15000
+
+Claim Type: vehicle
+Attachments: images
+Initial Estimate: 14000
