@@ -1,4 +1,4 @@
-# JARVIS · Claims Intelligence AI
+# NEXORA · Claims Intelligence AI
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2e37d6c9-e4c2-4925-8bf6-aac99ec92e29" />
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1415f4f6-b4b4-4a28-842e-0127441b99ff" />
 
