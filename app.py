@@ -1,4 +1,3 @@
-
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
@@ -106,11 +105,12 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    for icon, label in [("⊞","Dashboard"),("◈","Claims"),("◎","Fraud Radar"),("⟁","Pipeline"),("⌘","AI Console"),("✦","Settings")]:
+    pages = [("⊞","Dashboard"),("◈","Claims"),("◎","Fraud Radar"),("⟁","Pipeline"),("⌘","AI Console"),("✦","Settings")]
+    for icon, label in pages:
         active = "nav-active" if st.session_state.page == label else ""
         col = st.container()
         col.markdown(f'<div class="{active}">', unsafe_allow_html=True)
-        if col.button(f"{icon}  {label}", key=f"nav_{label}"):
+        if col.button(f"{icon}  {label}", key=f"nav_{label}", width='stretch'):
             st.session_state.page = label
             st.rerun()
         col.markdown("</div>", unsafe_allow_html=True)
@@ -128,7 +128,7 @@ with st.sidebar:
         <span style="font-size:11px;color:rgba(226,244,255,0.65);">Fraud Model</span>
       </div>
       <div style="display:flex;align-items:center;gap:8px;">
-        <div style="width:6px;height:6px;border-radius:50%;background:#00f5ff;box-shadow:0 0 8px #00f5ff;"></div>
+        <div style="width:6px;height:6px;border-radius:50%;background:#00f5ff;box-shadow:0 0 8px #00f5ff;animation:blink 1.5s ease infinite;"></div>
         <span style="font-size:11px;color:rgba(226,244,255,0.65);">AI Router</span>
       </div>
     </div>
@@ -173,8 +173,10 @@ if st.session_state.page == "Dashboard":
         if st.button("⬆  Ingest new claim", key="hero_ingest"):
             st.session_state.page = "Claims"; st.rerun()
     with b2:
+        st.markdown('<div class="btn-ghost">', unsafe_allow_html=True)
         if st.button("View pipeline", key="hero_pipeline"):
             st.session_state.page = "Pipeline"; st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -187,14 +189,14 @@ if st.session_state.page == "Dashboard":
     ]
     for i, (col, (label, val, vc, delta, up, icon, bar_pct)) in enumerate(zip([k1,k2,k3,k4], kpi_data)):
         with col:
+            delta_cls = "" if up else "kpi-delta-red"
             bar_color = "#00ff9d" if up else "#ff4d6d"
-            dc = "" if up else "kpi-delta-red"
             st.markdown(f"""
             <div class="kpi-card">
               <div class="kpi-icon">{icon}</div>
               <div class="kpi-label">{label}</div>
               <div class="kpi-value {vc}">{val}</div>
-              <div class="kpi-delta {dc}">{delta} <span class="kpi-delta-val">vs last week</span></div>
+              <div class="kpi-delta {delta_cls}">{delta} <span class="kpi-delta-val">vs last week</span></div>
               <div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:14px;overflow:hidden;">
                 <div style="height:100%;width:{bar_pct}%;background:{bar_color};border-radius:2px;box-shadow:0 0 8px {bar_color}88;"></div>
               </div>
@@ -205,12 +207,7 @@ if st.session_state.page == "Dashboard":
 
     left_col, right_col = st.columns([1.05, 1])
     with left_col:
-        st.markdown("""
-        <div class="card-header">
-          <div class="card-icon">◈</div>
-          <div><div class="card-title">FNOL Intake</div><div class="card-sub">Paste text or upload .txt</div></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="card-header"><div class="card-icon">◈</div><div><div class="card-title">FNOL Intake</div><div class="card-sub">Paste text or upload .txt</div></div></div>""", unsafe_allow_html=True)
         fnol_text = st.text_area("FNOL Text", value=SAMPLE_FNOL, height=220, key="dashboard_fnol", label_visibility="collapsed")
         uploaded = st.file_uploader("Upload FNOL document", type=["txt","json","pdf","docx"], key="dashboard_upload", label_visibility="collapsed")
         if uploaded:
@@ -219,16 +216,13 @@ if st.session_state.page == "Dashboard":
         with pc:
             process_btn = st.button("⚙  Process FNOL", key="dash_process")
         with rc:
+            st.markdown('<div class="btn-ghost">', unsafe_allow_html=True)
             if st.button("Reset to sample", key="dash_reset"):
                 st.session_state.last_result = None; st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
     with right_col:
-        st.markdown("""
-        <div class="card-header">
-          <div class="card-icon">✦</div>
-          <div><div class="card-title">Decision Output</div><div class="card-sub">extractedFields · missingFields · route · reasoning</div></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="card-header"><div class="card-icon">✦</div><div><div class="card-title">Decision Output</div><div class="card-sub">extractedFields · missingFields · route · reasoning</div></div></div>""", unsafe_allow_html=True)
         result_placeholder = st.empty()
 
         if st.session_state.last_result:
@@ -291,12 +285,12 @@ if st.session_state.page == "Dashboard":
 
     tc, ac = st.columns([1.4, 1])
     with tc:
-        st.markdown('<div class="section-header"><div class="section-title">Throughput · 12h</div><div style="font-size:12px;color:var(--text-dim);">Claims processed per hour</div></div>', unsafe_allow_html=True)
+        st.markdown("""<div class="section-header"><div class="section-title">Throughput · 12h</div><div style="font-size:12px;color:var(--text-dim);">Claims processed per hour</div></div>""", unsafe_allow_html=True)
         now = datetime.now()
         hrs = [(now - timedelta(hours=12-i)).strftime("%H:%M") for i in range(13)]
-        base = [38,42,55,48,72,81,69,95,110,102,118,130,128]
+        noise = [b + random.randint(-4,4) for b in [38,42,55,48,72,81,69,95,110,102,118,130,128]]
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=hrs, y=[b+random.randint(-4,4) for b in base], mode="lines", fill="tozeroy", fillcolor="rgba(0,245,255,0.07)", line=dict(color="#00f5ff", width=2.5, shape="spline")))
+        fig.add_trace(go.Scatter(x=hrs, y=noise, mode="lines", fill="tozeroy", fillcolor="rgba(0,245,255,0.07)", line=dict(color="#00f5ff", width=2.5, shape="spline"), hovertemplate="%{x}<br><b>%{y}</b> claims<extra></extra>"))
         fig = plotly_dark_layout(fig, height=240)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
@@ -316,11 +310,11 @@ if st.session_state.page == "Dashboard":
             st.session_state.page = "AI Console"; st.rerun()
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="section-header"><div class="section-title">Live Claims Pipeline</div></div>', unsafe_allow_html=True)
+    st.markdown("""<div class="section-header"><div class="section-title">Live Claims Pipeline</div><div class="section-action">View all →</div></div>""", unsafe_allow_html=True)
 
     rows = get_claims()
     if rows:
-        cols_h = st.columns([1.2,1.5,1,1,1.8,1.2])
+        cols_h = st.columns([1.2, 1.5, 1, 1, 1.8, 1.2])
         for col, h in zip(cols_h, ["ID","Policy","Damage","Risk","Route","Date"]):
             col.markdown(f"<div style='font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;padding:6px 0;'>{h}</div>", unsafe_allow_html=True)
         st.markdown("<hr style='margin:4px 0 8px;'>", unsafe_allow_html=True)
@@ -331,16 +325,17 @@ if st.session_state.page == "Dashboard":
             rc_cls = route_class(route_)
             damage = d.get("estimated_damage","—")
             policy = d.get("policy_number", f"PN-{cid:04d}")
-            rcolor = "#ff4d4d" if int(risk_ or 0)>60 else "#ffd93d" if int(risk_ or 0)>35 else "#00ff9d"
-            cols_r = st.columns([1.2,1.5,1,1,1.8,1.2])
+            rcolor = "#ff4d4d" if int(risk_ or 0) > 60 else "#ffd93d" if int(risk_ or 0) > 35 else "#00ff9d"
+            cols_r = st.columns([1.2, 1.5, 1, 1, 1.8, 1.2])
             cols_r[0].markdown(f"<span class='mono cyan' style='font-size:11px;'>#{cid:04d}</span>", unsafe_allow_html=True)
             cols_r[1].markdown(f"<span style='font-size:12px;'>{str(policy)[:14]}</span>", unsafe_allow_html=True)
             cols_r[2].markdown(f"<span style='font-size:12px;font-weight:600;'>₹{damage}</span>", unsafe_allow_html=True)
             cols_r[3].markdown(f"<span style='font-size:12px;color:{rcolor};font-weight:700;'>{risk_}</span>", unsafe_allow_html=True)
             cols_r[4].markdown(f"<span class='route-badge {rc_cls}' style='font-size:10px;padding:3px 8px;'>{route_}</span>", unsafe_allow_html=True)
             cols_r[5].markdown(f"<span style='font-size:10px;color:var(--text-dim);'>{datetime.now().strftime('%d %b %H:%M')}</span>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
     else:
-        st.markdown('<div class="glass-card" style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px;">No claims processed yet.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="glass-card" style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px;">No claims processed yet. Use the FNOL Intake above to get started.</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════
@@ -355,29 +350,22 @@ elif st.session_state.page == "Claims":
 
     lc, rc = st.columns([1.1, 1])
     with lc:
-        st.markdown("""
-        <div class="card-header">
-          <div class="card-icon">◈</div>
-          <div><div class="card-title">FNOL Document</div><div class="card-sub">Paste raw text or upload a file</div></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="card-header"><div class="card-icon">◈</div><div><div class="card-title">FNOL Document</div><div class="card-sub">Paste raw text or upload a file</div></div></div>""", unsafe_allow_html=True)
         uploaded_file = st.file_uploader("Upload FNOL", type=["txt","json","pdf","docx"], key="claims_upload", label_visibility="collapsed")
-        default_text = read_file(uploaded_file) if uploaded_file else SAMPLE_FNOL
+        default_text = SAMPLE_FNOL
+        if uploaded_file:
+            default_text = read_file(uploaded_file)
         claim_text = st.text_area("FNOL Document", value=default_text, height=340, key="claims_textarea", label_visibility="collapsed")
         c1, c2 = st.columns(2)
         with c1:
             run_btn = st.button("⚙  Run AI Agent", key="claims_run")
         with c2:
-            if st.button("Use Sample", key="claims_sample"):
-                st.rerun()
+            st.markdown('<div class="btn-ghost">', unsafe_allow_html=True)
+            if st.button("Use Sample", key="claims_sample"): st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
     with rc:
-        st.markdown("""
-        <div class="card-header">
-          <div class="card-icon">✦</div>
-          <div><div class="card-title">AI Extraction Result</div><div class="card-sub">Structured fields · Validation · Routing</div></div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown("""<div class="card-header"><div class="card-icon">✦</div><div><div class="card-title">AI Extraction Result</div><div class="card-sub">Structured fields · Validation · Routing</div></div></div>""", unsafe_allow_html=True)
         result_area = st.empty()
 
         if run_btn and claim_text.strip():
@@ -387,11 +375,11 @@ elif st.session_state.page == "Claims":
                 result_area.markdown(f'<div class="glass-card" style="padding:14px 18px;"><span class="cyan mono" style="font-size:12px;">▶ {step}</span></div>', unsafe_allow_html=True)
                 time.sleep(0.35)
 
-            data       = extract_fields(claim_text)
+            data = extract_fields(claim_text)
             validation = validate_fields(data)
-            route      = route_claim(data, validation)
-            reason     = generate_reason(route, data, validation)
-            risk       = max(0, 100 - validation.get("confidence_score", 50))
+            route = route_claim(data, validation)
+            reason = generate_reason(route, data, validation)
+            risk = max(0, 100 - validation.get("confidence_score", 50))
             save_claim(data, validation, route, reason, risk)
             st.session_state.last_result = dict(data=data, validation=validation, route=route, reason=reason, risk=risk)
             bar.empty()
@@ -400,37 +388,30 @@ elif st.session_state.page == "Claims":
                 result_area.markdown(f'<div class="fraud-alert">⚠ Document classified as: <b>{data["_meta"].replace("_"," ").upper()}</b></div>', unsafe_allow_html=True)
             else:
                 rc_cls = route_class(route)
-                q      = validation.get("quality","")
-                q_cls  = {"high":"pill-ok","medium":"pill-warn","low":"pill-err"}.get(q,"pill-warn")
+                q = validation.get("quality","")
+                q_cls = {"high":"pill-ok","medium":"pill-warn","low":"pill-err"}.get(q,"pill-warn")
 
                 fields_html = "".join(
                     f'<div class="field-item"><div class="field-key">{k.replace("_"," ")}</div><div class="field-val">{str(v)[:32] if v else "—"}</div></div>'
                     for k, v in data.items() if not k.startswith("_")
                 )
 
-                # Build sections BEFORE f-string to avoid quote conflicts
-                missing_list = validation.get("missing", [])
-                inconsist_list = validation.get("inconsistent", [])
+                # Build sections as variables BEFORE f-string
+                missing_items = validation.get("missing", [])
+                inconsist_items = validation.get("inconsistent", [])
 
-                missing_pills = "".join(f'<span class="status-pill pill-err">{f}</span>' for f in missing_list)
-                inconsist_pills = "".join(f'<span class="status-pill pill-warn">{w.replace("_"," ")}</span>' for w in inconsist_list)
+                missing_pills = "".join(f'<span class="status-pill pill-err">{f}</span>' for f in missing_items)
+                inconsist_pills = "".join(f'<span class="status-pill pill-warn">{w.replace("_"," ")}</span>' for w in inconsist_items)
 
-                missing_section = (
-                    '<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Missing Fields</div>' + missing_pills
-                ) if missing_pills else ""
-
-                inconsist_section = (
-                    '<div style="font-size:11px;color:var(--text-dim);margin:8px 0 6px;">Inconsistencies</div>' + inconsist_pills
-                ) if inconsist_pills else ""
+                missing_section = '<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Missing Fields</div>' + missing_pills if missing_pills else ""
+                inconsist_section = '<div style="font-size:11px;color:var(--text-dim);margin:8px 0 6px;">Inconsistencies</div>' + inconsist_pills if inconsist_pills else ""
 
                 result_area.markdown(f"""
                 <div style="animation:fadeSlideUp 0.5s ease;">
                   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
                     <span class="route-badge {rc_cls}">{route}</span>
                     <span class="status-pill {q_cls}">Quality: {q.upper()}</span>
-                    <span style="margin-left:auto;font-size:12px;color:var(--text-dim);">
-                      Confidence: <span class="mono cyan">{validation.get("confidence_score",0)}/100</span>
-                    </span>
+                    <span style="margin-left:auto;font-size:12px;color:var(--text-dim);">Confidence: <span class="mono cyan">{validation.get("confidence_score",0)}/100</span></span>
                   </div>
                   <div class="field-grid">{fields_html}</div>
                   <div style="margin-top:14px;">
@@ -473,8 +454,8 @@ elif st.session_state.page == "Fraud Radar":
     <div class="hero-sub" style="margin-bottom:24px;">Real-time fraud signal monitoring, geographic hotspot analysis, and risk scoring.</div>
     """, unsafe_allow_html=True)
 
-    fk1,fk2,fk3,fk4 = st.columns(4)
-    for col,(label,val,vc,delta,up) in zip([fk1,fk2,fk3,fk4],[
+    fk1, fk2, fk3, fk4 = st.columns(4)
+    for col, (label, val, vc, delta, up) in zip([fk1,fk2,fk3,fk4],[
         ("ACTIVE FLAGS","34","val-err","⬈ +12%",True),
         ("INVESTIGATION","9","val-warn","→ 0%",True),
         ("AVG RISK SCORE","61","val-warn","⬊ -4.1%",False),
@@ -486,46 +467,50 @@ elif st.session_state.page == "Fraud Radar":
 
     st.markdown("<br>", unsafe_allow_html=True)
     mc, rc = st.columns([1.3, 1])
-
     with mc:
-        st.markdown('<div class="section-header"><div class="section-title">Fraud Hotspot Map</div></div>', unsafe_allow_html=True)
-        lats=[19.076,28.704,12.971,22.572,17.385,23.022,26.912,13.082,21.177,30.733]
-        lons=[72.877,77.102,77.594,88.363,78.486,72.571,75.857,80.270,72.831,76.779]
-        sizes=[random.randint(8,25) for _ in range(10)]
-        cities=["Mumbai","Delhi","Bangalore","Kolkata","Hyderabad","Ahmedabad","Jaipur","Chennai","Surat","Ludhiana"]
+        st.markdown("""<div class="section-header"><div class="section-title">Fraud Hotspot Map</div></div>""", unsafe_allow_html=True)
+        lats = [19.076,28.704,12.971,22.572,17.385,23.022,26.912,13.082,21.177,30.733]
+        lons = [72.877,77.102,77.594,88.363,78.486,72.571,75.857,80.270,72.831,76.779]
+        sizes = [random.randint(8,25) for _ in range(10)]
+        cities = ["Mumbai","Delhi","Bangalore","Kolkata","Hyderabad","Ahmedabad","Jaipur","Chennai","Surat","Ludhiana"]
         fig = go.Figure()
-        fig.add_trace(go.Scattergeo(lat=lats,lon=lons,text=cities,mode="markers",
-            marker=dict(size=sizes,color=sizes,colorscale=[[0,"rgba(0,255,157,0.7)"],[0.5,"rgba(255,211,61,0.8)"],[1,"rgba(255,77,77,0.9)"]],showscale=False,line=dict(width=1,color="rgba(0,245,255,0.4)")),
-            hovertemplate="<b>%{text}</b><extra></extra>"))
-        fig.update_geos(scope="asia",bgcolor="rgba(0,0,0,0)",showland=True,landcolor="rgba(0,20,30,0.8)",showocean=True,oceancolor="rgba(0,5,15,0.9)",showcoastlines=True,coastlinecolor="rgba(0,245,255,0.2)",showframe=False)
+        fig.add_trace(go.Scattergeo(lat=lats, lon=lons, text=cities, mode="markers",
+            marker=dict(size=sizes, color=sizes, colorscale=[[0,"rgba(0,255,157,0.7)"],[0.5,"rgba(255,211,61,0.8)"],[1,"rgba(255,77,77,0.9)"]],
+            showscale=False, line=dict(width=1, color="rgba(0,245,255,0.4)")), hovertemplate="<b>%{text}</b><extra></extra>"))
+        fig.update_geos(scope="asia", bgcolor="rgba(0,0,0,0)", showland=True, landcolor="rgba(0,20,30,0.8)",
+            showocean=True, oceancolor="rgba(0,5,15,0.9)", showcoastlines=True, coastlinecolor="rgba(0,245,255,0.2)", showframe=False)
         fig = plotly_dark_layout(fig, height=320)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     with rc:
-        st.markdown('<div class="section-header"><div class="section-title">Risk Distribution</div></div>', unsafe_allow_html=True)
+        st.markdown("""<div class="section-header"><div class="section-title">Risk Distribution</div></div>""", unsafe_allow_html=True)
         fig = go.Figure(data=[go.Pie(
-            labels=["Low (0-35)","Medium (35-65)","High (65-100)"],values=[42,35,23],hole=0.65,
-            marker=dict(colors=["rgba(0,255,157,0.8)","rgba(255,211,61,0.8)","rgba(255,77,77,0.8)"],line=dict(color="rgba(0,0,0,0.3)",width=2)),
-            textfont=dict(size=11,color="#e2f4ff"),hovertemplate="<b>%{label}</b><br>%{percent}<extra></extra>")])
-        fig.add_annotation(text="34<br>flags",x=0.5,y=0.5,showarrow=False,font=dict(size=22,color="#00f5ff"),align="center")
+            labels=["Low (0-35)","Medium (35-65)","High (65-100)"], values=[42,35,23], hole=0.65,
+            marker=dict(colors=["rgba(0,255,157,0.8)","rgba(255,211,61,0.8)","rgba(255,77,77,0.8)"], line=dict(color="rgba(0,0,0,0.3)",width=2)),
+            textfont=dict(size=11, color="#e2f4ff"), hovertemplate="<b>%{label}</b><br>%{percent}<extra></extra>")])
+        fig.add_annotation(text="34<br>flags", x=0.5, y=0.5, showarrow=False, font=dict(size=22, color="#00f5ff"), align="center")
         fig = plotly_dark_layout(fig, height=280)
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
         st.markdown('<div class="fraud-alert">🚨 High Risk Claim Detected — FNOL-8801 · $22,150 · Theft</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div class="section-header"><div class="section-title">Multi-Signal Fraud Radar</div></div>', unsafe_allow_html=True)
+    st.markdown("""<div class="section-header"><div class="section-title">Multi-Signal Fraud Radar</div><div class="section-action">Run deep scan →</div></div>""", unsafe_allow_html=True)
     rows = get_claims()
     if rows:
         ri, ri2 = st.columns(2)
         risky = [r for r in rows if (r[5] or 0) > 40][-6:]
-        categories = ["Timeline Gap","Damage Mismatch","Contact Invalid","Policy Lapse","Prior Claims","Third Party"]
         with ri:
+            categories = ["Timeline Gap","Damage Mismatch","Contact Invalid","Policy Lapse","Prior Claims","Third Party"]
             for rw in risky[:3]:
-                cid,_,_,route_,_,risk_ = rw
+                cid, raw_data, raw_val, route_, _, risk_ = rw
                 vals = [random.randint(20,100) for _ in categories]
                 fig = go.Figure()
-                fig.add_trace(go.Scatterpolar(r=vals+[vals[0]],theta=categories+[categories[0]],fill="toself",fillcolor="rgba(255,77,77,0.1)",line=dict(color="#ff4d4d",width=1.5)))
-                fig.update_layout(polar=dict(radialaxis=dict(visible=True,range=[0,100]),angularaxis=dict(tickfont=dict(size=10,color="#e2f4ff")),bgcolor="rgba(0,0,0,0)"),paper_bgcolor="rgba(0,0,0,0)",font=dict(color="#e2f4ff"),height=200,margin=dict(l=30,r=30,t=20,b=20),title=dict(text=f"Claim #{cid} · Risk {risk_}",font=dict(size=12,color="#00f5ff")))
+                fig.add_trace(go.Scatterpolar(r=vals+[vals[0]], theta=categories+[categories[0]], fill="toself",
+                    fillcolor="rgba(255,77,77,0.1)", line=dict(color="#ff4d4d",width=1.5), name=f"Claim #{cid}"))
+                fig.update_layout(polar=dict(radialaxis=dict(visible=True,range=[0,100],tickfont=dict(size=8,color="#aaa")),
+                    angularaxis=dict(tickfont=dict(size=10,color="#e2f4ff")), bgcolor="rgba(0,0,0,0)"),
+                    paper_bgcolor="rgba(0,0,0,0)", font=dict(color="#e2f4ff"), height=200, margin=dict(l=30,r=30,t=20,b=20),
+                    title=dict(text=f"Claim #{cid} · Risk {risk_}", font=dict(size=12,color="#00f5ff")))
                 st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
     else:
         st.markdown('<div class="glass-card" style="text-align:center;padding:32px;color:var(--text-dim);font-size:13px;">Process claims to see fraud radar analysis.</div>', unsafe_allow_html=True)
@@ -542,28 +527,32 @@ elif st.session_state.page == "Pipeline":
     """, unsafe_allow_html=True)
 
     rows = get_claims()
-    total=len(rows); fast=sum(1 for r in rows if r[3]=="Fast-track"); manual=sum(1 for r in rows if r[3]=="Manual Review"); fraud=sum(1 for r in rows if r[3]=="Investigation Flag"); spec=sum(1 for r in rows if r[3]=="Specialist Queue")
+    total = len(rows)
+    fast   = sum(1 for r in rows if r[3] == "Fast-track")
+    manual = sum(1 for r in rows if r[3] == "Manual Review")
+    fraud  = sum(1 for r in rows if r[3] == "Investigation Flag")
+    spec   = sum(1 for r in rows if r[3] == "Specialist Queue")
 
-    pa,pb,pc_,pd = st.columns(4)
-    for col,label,val,cls in [(pa,"TOTAL CLAIMS",total,"val-ok"),(pb,"FAST-TRACK",fast,"val-ok"),(pc_,"MANUAL REVIEW",manual,"val-warn"),(pd,"FLAGGED",fraud+spec,"val-err")]:
+    pa, pb, pc_, pd = st.columns(4)
+    for col, label, val, cls in [(pa,"TOTAL CLAIMS",total,"val-ok"),(pb,"FAST-TRACK",fast,"val-ok"),(pc_,"MANUAL REVIEW",manual,"val-warn"),(pd,"FLAGGED",fraud+spec,"val-err")]:
         with col:
             st.markdown(f'<div class="kpi-card"><div class="kpi-label">{label}</div><div class="kpi-value {cls}">{val}</div></div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    fc, sc_ = st.columns([2,1])
+    fc, sc_ = st.columns([2, 1])
     with fc:
-        search = st.text_input("Search", placeholder="🔍  Search claims…", key="pipeline_search", label_visibility="collapsed")
+        search = st.text_input("Search", placeholder="🔍  Search claims, cases, agents…", key="pipeline_search", label_visibility="collapsed")
     with sc_:
         route_filter = st.selectbox("Filter", ["All Routes","Fast-track","Manual Review","Investigation Flag","Specialist Queue"], key="pipeline_filter", label_visibility="collapsed")
 
     st.markdown("<br>", unsafe_allow_html=True)
     if rows:
-        hcols = st.columns([0.7,1.5,1.8,1.3,0.8,1.5,1])
-        for col,h in zip(hcols,["#","Policy","Claimant","Damage","Risk","Route","Quality"]):
+        hcols = st.columns([0.7, 1.5, 1.8, 1.3, 0.8, 1.5, 1])
+        for col, h in zip(hcols, ["#","Policy","Claimant","Damage","Risk","Route","Quality"]):
             col.markdown(f"<div style='font-size:10px;font-weight:700;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;padding:4px 0;'>{h}</div>", unsafe_allow_html=True)
         st.markdown("<hr style='margin:4px 0 4px;'>", unsafe_allow_html=True)
         for row in rows[::-1]:
-            cid,raw_data,raw_val,route_,reason_,risk_ = row
+            cid, raw_data, raw_val, route_, reason_, risk_ = row
             try: d = json.loads(raw_data)
             except: d = {}
             try: v = json.loads(raw_val)
@@ -572,10 +561,12 @@ elif st.session_state.page == "Pipeline":
             policy_ = str(d.get("policy_number", f"PN-{cid:04d}"))
             claimant_ = str(d.get("claimant","—"))
             if search and search.lower() not in (policy_+claimant_).lower(): continue
-            damage_ = d.get("estimated_damage","—"); quality_ = v.get("quality","—")
-            rc_cls = route_class(route_); qc = {"high":"pill-ok","medium":"pill-warn","low":"pill-err"}.get(quality_,"pill-warn")
-            rcolor = "#ff4d4d" if int(risk_ or 0)>60 else "#ffd93d" if int(risk_ or 0)>35 else "#00ff9d"
-            dcols = st.columns([0.7,1.5,1.8,1.3,0.8,1.5,1])
+            damage_ = d.get("estimated_damage","—")
+            quality_ = v.get("quality","—")
+            rc_cls = route_class(route_)
+            qc = {"high":"pill-ok","medium":"pill-warn","low":"pill-err"}.get(quality_,"pill-warn")
+            rcolor = "#ff4d4d" if int(risk_ or 0) > 60 else "#ffd93d" if int(risk_ or 0) > 35 else "#00ff9d"
+            dcols = st.columns([0.7, 1.5, 1.8, 1.3, 0.8, 1.5, 1])
             dcols[0].markdown(f"<span class='mono cyan' style='font-size:11px;'>#{cid:04d}</span>", unsafe_allow_html=True)
             dcols[1].markdown(f"<span style='font-size:12px;'>{policy_[:16]}</span>", unsafe_allow_html=True)
             dcols[2].markdown(f"<span style='font-size:12px;'>{claimant_[:20]}</span>", unsafe_allow_html=True)
@@ -585,7 +576,7 @@ elif st.session_state.page == "Pipeline":
             dcols[6].markdown(f"<span class='status-pill {qc}' style='font-size:10px;padding:3px 8px;'>{quality_}</span>", unsafe_allow_html=True)
             st.markdown("<div style='border-bottom:1px solid rgba(0,245,255,0.06);margin:2px 0;'></div>", unsafe_allow_html=True)
     else:
-        st.markdown('<div class="glass-card" style="text-align:center;padding:48px;color:var(--text-dim);font-size:13px;">No claims in the pipeline yet.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="glass-card" style="text-align:center;padding:48px;color:var(--text-dim);font-size:13px;">No claims in the pipeline yet. Process an FNOL on the Claims page.</div>', unsafe_allow_html=True)
 
 
 # ══════════════════════════════════════════════════════
@@ -605,28 +596,37 @@ elif st.session_state.page == "AI Console":
           <div class="ai-console-header"><div class="ai-console-dot"></div><div class="ai-console-title">NEXORA · Claims Intelligence v2</div><div class="ai-console-sub">GPT-4o-mini</div></div>
           <div class="ai-console-body">
         """, unsafe_allow_html=True)
+
         if not st.session_state.chat_history:
-            st.markdown('<div class="ai-msg">👋 NEXORA online. I can help you analyze claims, detect fraud signals, validate policy data, or summarize case files.</div>', unsafe_allow_html=True)
+            st.markdown('<div class="ai-msg">👋 NEXORA online. I can help you analyze claims, detect fraud signals, validate policy data, or summarize case files. What would you like to investigate?</div>', unsafe_allow_html=True)
+
         for msg in st.session_state.chat_history[-10:]:
-            cls = "ai-msg-user" if msg["role"]=="user" else "ai-msg"
-            st.markdown(f'<div class="{cls}">{msg["content"]}</div>', unsafe_allow_html=True)
+            css_class = "ai-msg-user" if msg["role"] == "user" else "ai-msg"
+            st.markdown(f'<div class="{css_class}">{msg["content"]}</div>', unsafe_allow_html=True)
+
         st.markdown("</div></div>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
+
         user_input = st.text_input("Ask NEXORA", placeholder="Ask NEXORA anything about your claims…", key="ai_input", label_visibility="collapsed")
-        ic1,ic2 = st.columns([1.5,1])
+        ic1, ic2 = st.columns([1.5, 1])
         with ic1:
             send_btn = st.button("⬆  Send", key="ai_send")
         with ic2:
+            st.markdown('<div class="btn-ghost">', unsafe_allow_html=True)
             if st.button("Clear history", key="ai_clear"):
                 st.session_state.chat_history = []; st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+
         if send_btn and user_input.strip():
             st.session_state.chat_history.append({"role":"user","content":user_input})
             with st.spinner(""):
+                time.sleep(0.2)
                 try: reply = ask_ai(user_input)
                 except Exception as e: reply = f"[Agent offline: {e}]"
             st.session_state.chat_history.append({"role":"assistant","content":reply})
             st.rerun()
-        st.markdown('<div style="margin-top:12px;"><div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Quick Prompts</div></div>', unsafe_allow_html=True)
+
+        st.markdown("""<div style="margin-top:12px;"><div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Quick Prompts</div></div>""", unsafe_allow_html=True)
         for p in ["Summarize the top fraud risk factors in recent claims","What's the most common reason for Manual Review routing?","How is fraud score calculated in NEXORA?"]:
             if st.button(p, key=f"quick_{p[:20]}"):
                 st.session_state.chat_history.append({"role":"user","content":p})
@@ -636,12 +636,9 @@ elif st.session_state.page == "AI Console":
                 st.rerun()
 
     with info_col:
-        st.markdown("""
-        <div class="glass-card">
-          <div class="card-header"><div class="card-icon">◉</div><div><div class="card-title">Agent Capabilities</div></div></div>
-        """, unsafe_allow_html=True)
-        for icon,title,desc in [("🔍","FNOL Analysis","Extract & validate claim fields"),("⚡","Fraud Detection","Score risk signals and flag patterns"),("◈","Policy Lookup","Cross-reference policy dates & coverage"),("✦","Routing Logic","Explain routing decisions"),("◎","Case Summary","Summarize claim history")]:
-            st.markdown(f'<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:flex-start;"><div style="font-size:18px;min-width:24px;">{icon}</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;">{title}</div><div style="font-size:11px;color:var(--text-dim);">{desc}</div></div></div>', unsafe_allow_html=True)
+        st.markdown("""<div class="glass-card"><div class="card-header"><div class="card-icon">◉</div><div><div class="card-title">Agent Capabilities</div></div></div>""", unsafe_allow_html=True)
+        for icon, title, desc in [("🔍","FNOL Analysis","Extract & validate claim fields from raw documents"),("⚡","Fraud Detection","Score risk signals and flag suspicious patterns"),("◈","Policy Lookup","Cross-reference policy dates, limits and coverage"),("✦","Routing Logic","Explain why a claim was routed to a specific queue"),("◎","Case Summary","Summarize entire claim history and decisions")]:
+            st.markdown(f"""<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2);align-items:flex-start;"><div style="font-size:18px;min-width:24px;">{icon}</div><div><div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px;">{title}</div><div style="font-size:11px;color:var(--text-dim);">{desc}</div></div></div>""", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
         rows = get_claims()
@@ -668,29 +665,28 @@ elif st.session_state.page == "Settings":
     <div class="hero-sub" style="margin-bottom:24px;">Configure NEXORA AI models, thresholds, routing rules, and system preferences.</div>
     """, unsafe_allow_html=True)
 
-    s1,s2 = st.columns(2)
+    s1, s2 = st.columns(2)
     with s1:
-        st.markdown('<div class="card-header"><div class="card-icon">⚡</div><div><div class="card-title">AI Model Config</div></div></div>', unsafe_allow_html=True)
-        st.selectbox("Extraction Model",["openai/gpt-4o-mini","openai/gpt-4o","openai/gpt-3.5-turbo"],key="s_model")
-        st.selectbox("Fraud Model",["gemini-2.0-flash","gemini-1.5-pro","claude-3-haiku"],key="s_fraud_model")
-        st.slider("Extraction Temperature",0.0,1.0,0.0,0.1,key="s_temp")
-        st.slider("Fraud Sensitivity",0,100,65,5,key="s_fraud_sens")
+        st.markdown("""<div class="card-header"><div class="card-icon">⚡</div><div><div class="card-title">AI Model Config</div></div></div>""", unsafe_allow_html=True)
+        st.selectbox("Extraction Model", ["openai/gpt-4o-mini","openai/gpt-4o","openai/gpt-3.5-turbo"], key="s_model")
+        st.selectbox("Fraud Model", ["gemini-2.0-flash","gemini-1.5-pro","claude-3-haiku"], key="s_fraud_model")
+        st.slider("Extraction Temperature", 0.0, 1.0, 0.0, 0.1, key="s_temp")
+        st.slider("Fraud Sensitivity", 0, 100, 65, 5, key="s_fraud_sens")
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="card-header"><div class="card-icon">◈</div><div><div class="card-title">Routing Thresholds</div></div></div>', unsafe_allow_html=True)
-        st.slider("Fast-track max damage (₹)",5000,100000,25000,5000,key="s_fasttrack")
-        st.slider("High-risk score cutoff",50,100,75,5,key="s_highrisk")
+        st.markdown("""<div class="card-header"><div class="card-icon">◈</div><div><div class="card-title">Routing Thresholds</div></div></div>""", unsafe_allow_html=True)
+        st.slider("Fast-track max damage (₹)", 5000, 100000, 25000, 5000, key="s_fasttrack")
+        st.slider("High-risk score cutoff", 50, 100, 75, 5, key="s_highrisk")
 
     with s2:
-        st.markdown('<div class="card-header"><div class="card-icon">◉</div><div><div class="card-title">System Preferences</div></div></div>', unsafe_allow_html=True)
-        st.toggle("Autonomous Mode",value=True,key="s_auto")
-        st.toggle("Real-time Alerts",value=True,key="s_alerts")
-        st.toggle("Save all claims to DB",value=True,key="s_save_db")
-        st.toggle("Enable voice agent",value=False,key="s_voice")
-        st.toggle("Debug extraction logs",value=False,key="s_debug")
+        st.markdown("""<div class="card-header"><div class="card-icon">◉</div><div><div class="card-title">System Preferences</div></div></div>""", unsafe_allow_html=True)
+        st.toggle("Autonomous Mode", value=True, key="s_auto")
+        st.toggle("Real-time Alerts", value=True, key="s_alerts")
+        st.toggle("Save all claims to DB", value=True, key="s_save_db")
+        st.toggle("Enable voice agent", value=False, key="s_voice")
+        st.toggle("Debug extraction logs", value=False, key="s_debug")
         st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown('<div class="card-header"><div class="card-icon">⊞</div><div><div class="card-title">Database</div></div></div>', unsafe_allow_html=True)
+        st.markdown("""<div class="card-header"><div class="card-icon">⊞</div><div><div class="card-title">Database</div></div></div>""", unsafe_allow_html=True)
         rows = get_claims()
-        pct = min(100, len(rows)*10)
         st.markdown(f"""
         <div class="glass-card" style="padding:16px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -698,11 +694,11 @@ elif st.session_state.page == "Settings":
             <span class="mono cyan" style="font-size:13px;">{len(rows)} records</span>
           </div>
           <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:4px;">
-            <div style="height:100%;width:{pct}%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:4px;"></div>
+            <div style="height:100%;width:{min(100,len(rows)*10)}%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:4px;"></div>
           </div>
-          <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">{pct}% of 10-record preview capacity</div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:6px;">{min(100,len(rows)*10)}% of 10-record preview capacity</div>
         </div>
         """, unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("Save Settings",key="save_settings"):
+        if st.button("Save Settings", key="save_settings"):
             st.success("Settings saved successfully.")
