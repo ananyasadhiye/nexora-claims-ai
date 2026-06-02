@@ -366,13 +366,13 @@ elif st.session_state.page == "Claims":
 
     with rc:
         st.markdown("""<div class="card-header"><div class="card-icon">✦</div><div><div class="card-title">AI Extraction Result</div><div class="card-sub">Structured fields · Validation · Routing</div></div></div>""", unsafe_allow_html=True)
-        result_area = st.empty()
+        
 
         if run_btn and claim_text.strip():
             bar = st.progress(0)
             for step, pct in [("Classifying document…",20),("Extracting fields…",45),("Validating data…",65),("Scoring risk…",82),("Routing…",100)]:
                 bar.progress(pct)
-                result_area.markdown(f'<div class="glass-card" style="padding:14px 18px;"><span class="cyan mono" style="font-size:12px;">▶ {step}</span></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="glass-card" style="padding:14px 18px;"><span class="cyan mono" style="font-size:12px;">▶ {step}</span></div>', unsafe_allow_html=True)
                 time.sleep(0.35)
 
             data = extract_fields(claim_text)
@@ -385,7 +385,7 @@ elif st.session_state.page == "Claims":
             bar.empty()
 
             if data.get("_meta"):
-                result_area.markdown(f'<div class="fraud-alert">⚠ Document classified as: <b>{data["_meta"].replace("_"," ").upper()}</b></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="fraud-alert">⚠ Document classified as: <b>{data["_meta"].replace("_"," ").upper()}</b></div>', unsafe_allow_html=True)
             else:
                 rc_cls = route_class(route)
                 q = validation.get("quality","")
@@ -406,7 +406,7 @@ elif st.session_state.page == "Claims":
                 missing_section = '<div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">Missing Fields</div>' + missing_pills if missing_pills else ""
                 inconsist_section = '<div style="font-size:11px;color:var(--text-dim);margin:8px 0 6px;">Inconsistencies</div>' + inconsist_pills if inconsist_pills else ""
 
-                result_area.markdown(f"""
+                st.markdown(f"""
                 <div style="animation:fadeSlideUp 0.5s ease;">
                   <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
                     <span class="route-badge {rc_cls}">{route}</span>
@@ -428,7 +428,7 @@ elif st.session_state.page == "Claims":
         elif st.session_state.last_result:
             r = st.session_state.last_result
             rc_cls = route_class(r["route"])
-            result_area.markdown(f"""
+            st.markdown(f"""
             <div class="glass-card">
               <div class="route-badge {rc_cls}" style="margin-bottom:12px;">{r["route"]}</div>
               <div style="font-size:12px;color:var(--text-dim);margin-bottom:8px;">Last processed result. Run a new FNOL to refresh.</div>
@@ -436,7 +436,7 @@ elif st.session_state.page == "Claims":
             </div>
             """, unsafe_allow_html=True)
         else:
-            result_area.markdown("""
+            st.markdown("""
             <div class="decision-empty" style="min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
               <div style="font-size:48px;opacity:0.2;">✦</div>
               <div style="font-size:13px;color:var(--text-dim);text-align:center;">Run the AI agent to see extraction results here.</div>
