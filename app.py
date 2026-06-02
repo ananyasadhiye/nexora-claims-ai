@@ -644,8 +644,7 @@ elif st.session_state.page == "Claims":
                   <div class="field-grid">{fields_html}</div>
                   <div style="margin-top:14px;">
                     {"<div style='font-size:11px;color:var(--text-dim);margin-bottom:6px;'>Missing Fields</div>" + missing_html if missing_html else ""}
-                    {"<div style='font-size:11px;color:var(--text-dim);margin:8px 0 6px;'>Inconsistencies</div>" + inconsist_html if inconsist_html else ""}
-                  </div>
+                    {('<div style="font-size:11px;color:var(--text-dim);margin:8px 0 6px;">Inconsistencies</div>' + inconsist_html) if inconsist_html else ""}
                   <div style="margin-top:14px;padding:12px 16px;background:rgba(0,245,255,0.04);
                               border:1px solid var(--border2);border-radius:8px;">
                     <div style="font-size:10px;color:var(--text-dim);letter-spacing:1px;
